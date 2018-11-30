@@ -1,3 +1,111 @@
 # Welcome to my blog
 
 I'm glad you are here. I plan to talk about ...
+
+Notes on Deep Learning
+## Chap. 1 Introduction
+- [Solution towards AI] It allows computers to learn from experience and understands the world in terms of **a hierarchy of concepts**, with each concept defined through its relation to simpler concepts
+- [Crucial components in Machine Learning] the representation of the data they are given, or called "Feature"
+    - [Representation Learning]  Use machine learning to discover not only the mapping from representation to output but also the representation itself.
+- [Historical Wave] cybernetics -> connectionism + neural networks -> deep learning
+## Chap. 4 Numerical Computation
+- []
+## Chap. 6 Deep Feedforward Networks
+- [Deep Feedforward Networks] also called feedforward neural networks or multilayer perceptrons (MLPs). It does not have feedback connections
+- [Choose mapping `$\phi$` options]
+    - It should be generic, avoiding overfitting
+    - Manually engineer in conventional way
+    - As for deep learning, it is learned
+- [Nonlinear transformation] usually followed by a fixed nonlinear function called an activation function
+- [Learning component] like machine learning, including optimizaiton procedure, cost function and model familiy
+    - Difference in optimization, loss function will be nonconvex due to nonlinear propertity of units, so iterative method required
+- [Gradient-Based Learning] No global convengency assured, and initial parameters are crucial
+    - Maximum cross entropy simplifies the choosing of cost function
+    - Negative log-likelihood helps to solve vanishing gradient problem
+    -  mean squared error and mean absolute error often lead to poor results when used with gradient-based optimization
+- [Output Units] Linear, Sigmoid, Softmax, Other
+- [Hidden Units] ReLU is widely used(without much consideration)
+    - Although at 0 it is not differentiable, it doesn't matter as objective won't arrive it
+    - Most only distinguish on activation function
+    - [Maxout units] Divide the input into k groups and output the maximum.
+    - Before ReLU, logistic sigmoid and hyperbolic tangent is used as activation function
+- [Architecture] main consideration is on depth and width
+    - [Universal Approximation Properties] a feedforward network introduced here can approximate any Borel measurable function
+    - Two core process, learn and generalize
+    - Hidden lay with activation function can be regared as "fold" the complex space
+        - In general, deep model leads to high generalization
+- [Backpropagation] Information flow back to help calculate the gradient
+    - Not only vectors, all tensors can use this method
+    - it performs on the order of one Jacobian product per node in the graph
+    - Two categories: symbol-to-symbol and symbol-to-numeric, the former introduces the computational graph
+    - It is a table-filling strategy, a.k.a., dynamic programming
+- **[PROBLEM-6]** 
+    - Cross-entropy的计算与其本质，与条件熵的区别？交叉熵比MSE好在哪里？
+        - A: D(p||q) = H(p) + 交叉熵H(p,q)。最小化DL Divergence等同于最小化交叉熵。
+    - (P.173) 为什么最大似然估计能够学习条件概率？
+    - (P.176)线性单元输出为何能表示高斯分布？为什么最大化log似然与最小化MSE等价？
+    - (P.183)混合密度网络是如何学习的？其中的高斯分布、协方差矩阵、精度矩阵有什么关系？
+        - A: `$N(x;\mu;\sigma^2) = \sqrt{\frac{1}{2\pi\sigma^2}}exp(-\frac{1}{2\sigma^2}(x-\mu)^2)$` 高斯分布需要求标准差平方的倒数，引入精度`$\beta\in(0,\infty)$`避免计算，原本的分布转变成`$N(x;\mu;\beta^{-1}) = \sqrt{\frac{\beta}{2\pi}}exp(-\frac{1}{2}\beta(x-\mu)^2)$`。多维高斯分布的协方差矩阵同样可转变成精度矩阵，更为高效，无需求逆。由`$N(x;\mu;\Sigma) = \sqrt{\frac{1}{(2\pi)^ndet(\Sigma)}}exp(-\frac{1}{2}(x-\mu)^T\Sigma^{-1}(x-\mu))$`转变成`$N(x;\mu;\beta^{-1}) = \sqrt{\frac{det(\beta)}{(2\pi)^n}}exp(-\frac{1}{2}(x-\mu)^T\beta(x-\mu))$`
+    - (P.190)矩阵表示的反向传播推导？
+    - (P.217)Hessian矩阵在深度学习的应用，另外Krylov方法是？
+        - A: H矩阵可以应用于泰勒级数。 
+    - 矩阵求导如何定义？
+## Chap. 7 Regularization for Deep Learning
+- [Nature of Regularization] Regularization of an estimator works by trading increased bias for reduced variance.
+- [Parameter penalties] Only the weights are imposed penalty, leaving the bias. The bias controls a single variable, the penalty on it may cause under-fitting.
+    - [`$L^2$` Regularization] a.k.a., weight decay. Other communities name it ridge regression or Tikhonov regularization.
+        - Decay is along the eigenvector(OF H), the scaling factor is `$\frac{\lambda_i}{\lambda_i+\alpha}$`, the decay effect is less significant on larger `$\lambda_i$`.
+        - L2 regularization causes the learning algorithm to “perceive” the input X as having higher variance
+    - [`$L^1$` Regularization] generating more sparse solution, so it can be used to select feature (eg. LASSO)
+    - Too much weight decay will trap the network in a bad local minimum 
+- [Dataset augmentation] Injecting noise in the input also works
+    - It makes the model more robust.
+    - Label smoothing is imposing on the output, functioning as regularization
+- [Sparse Representation] Place a penalty on the activations of the units in a neural network, encouraging their activations to be sparse.
+    - Mechanism is the same as parameter regularization, imposing penalty on objective function(`$\Omega(h)$`) 
+- [Ensemble techniques] combining several models to achieve low generalization error.
+    - Bagging (short for bootstrap aggregating), helps regularization
+    - Boosting, on the contrary, drives the capacity up.
+- [Dropout] Similar to bagging,  it provides a computationally inexpensive but powerful method of regularizing a broad family of models 
+    - take advantage of shared weight from parental structure.
+    - [weight scaling inference rule] approximate `$p_{ensemble}$` by evaluating `$p(y|x)$` in the model with all units, then multiply the weight with the probability of including the unit.
+        - ensure that the expected total input to a unit at test time is roughly the same as the expected total input to that unit at train time 
+- [Adversarial training]  explicitly introduce a local constancy prior into supervised neural nets. 
+- **[PROBLEM-7]** 
+    - (P.225)Weight-decay中最优权重的推导与无正则条件下的对比 ;L1解析解的结论推导
+    - reproject重投影与参数惩罚、显式约束的关系？
+    - 半监督学习中，生成模型、判别模型的关系？参数共享的含义是什么？
+    - Early stopping 与 L2 regularization的关系推导？
+    - (P.261)流形的含义是什么，正切传播、双反向传播和对抗训练的关系是什么？
+    - 整理可以应用的正则表达工具包
+## Chap. 8 Optimization for Training Deep Models
+- [Difference]We reduce a different cost function `$J(\theta)$` in the hope that doing so will improve P. It is indirect.
+    - We hope to minimize the expectation on the data-generating distribution `$p_{data}$`: `$J^*(\theta) = E_{(x,y)\sim p_{data}}L(f(x;\theta),y)$` 
+    - However, the true distribution is unknown, so we can only minimize empirical risk instead, which may easily lead to overfitting
+- [Challenge in Optimization] Optimization problem may be non-convex.
+    - Ill-condition Hessian matrix
+    - Model identifiability issues mean that a neural network cost function can have an extremely large or even uncountably infinite amount of local minima.
+    - For many random functions, in low- dimensional spaces, local minima are common. In higher-dimensional spaces, local minima are rare, and saddle points are more common. 
+        - Commonly, saddle points have higher cost than local minima
+        - Newton method is not suitable, as it finds the point where the gradient is zero
+    - Using gradient clipping to avoid cliffs with exploding gradients
+    - Choose appropriate surrogate loss function to approximate true loss, and can be more accurately estimated
+- [Basic algorithm] 
+    - [SGD]Learning rate should be smaller as the training process goes
+        - In practice, on iteration `$\tau$`,`$\epsilon_k = (1-\alpha)\epsilon_0+\alpha\epsilon_\tau$`,`$\alpha = \frac{k}{\tau}$` 
+    - [Momentum] SGD is kind of slow, this method is aimed to accelerate learning.
+        - It solves two problems: poor conditioning of the Hessian matrix and variance in the stochastic gradient 
+        - It accumulates the former gradient
+        - Nesterov momentum method apply the current velocity before the gradient evaluated
+    - For adapative learning rates algorithms, not much theoretical difference.  
+- [Newton method] Approximate the point using 2-order Taloy formular. Calculating the inverse of H as the updating value
+    - Utilizing conjugate directions to avoid calculating inversion
+        - the seaching direction has to be vertical agaist the former one
+    - BFGS takes advantage of newton method, while overcomte its shortage(inversion calculation), it performs better on time but memory is required more
+- [block coordinate decent] Optimize the variable in term, when there's more than one optimization variable and the function has good properties like convex
+- **[PROBLEM-8]** 
+    - Hessian矩阵在优化中的应用，ill-condition的含义是什么？牛顿法的应用
+    - 鞍点的梯度定义是什么？
+    - 理解Adam算法，矩阶数、偏置修正等
+    - 整理可以应用的优化方法工具包
+- 6.23公式 
